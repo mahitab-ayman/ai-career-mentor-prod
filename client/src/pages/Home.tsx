@@ -32,9 +32,11 @@ export default function Home() {
       <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-40">
         <div className="container flex items-center justify-between h-16">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl gradient-primary flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" />
-            </div>
+            <img
+              src="https://d2xsxph8kpxj0f.cloudfront.net/310519663217691016/k7VpytXHEM35u7EgMMjw5j/logo-icon-3Zk42XAXdJxRFW3U6aUj3p.webp"
+              alt="CareerMentor AI Logo"
+              className="w-9 h-9 rounded-xl object-cover"
+            />
             <div>
               <span className="font-display font-bold text-foreground">CareerMentor AI</span>
               <span className="hidden sm:inline text-xs text-muted-foreground ml-2">for Women in Tech</span>
@@ -190,9 +192,11 @@ export default function Home() {
       <footer className="border-t border-border py-8 bg-card">
         <div className="container flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg gradient-primary flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-white" />
-            </div>
+            <img
+              src="https://d2xsxph8kpxj0f.cloudfront.net/310519663217691016/k7VpytXHEM35u7EgMMjw5j/logo-icon-3Zk42XAXdJxRFW3U6aUj3p.webp"
+              alt="CareerMentor AI Logo"
+              className="w-7 h-7 rounded-lg object-cover"
+            />
             <span className="font-display font-bold text-sm text-foreground">CareerMentor AI</span>
           </div>
           <p className="text-sm text-muted-foreground">Empowering women in technology, one career at a time.</p>

@@ -46,9 +46,11 @@ export default function AppLayout({ children, title }: AppLayoutProps) {
       {/* Logo */}
       <div className="p-6 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl gradient-primary flex items-center justify-center flex-shrink-0">
-            <Sparkles className="w-5 h-5 text-white" />
-          </div>
+          <img
+            src="https://d2xsxph8kpxj0f.cloudfront.net/310519663217691016/k7VpytXHEM35u7EgMMjw5j/logo-icon-3Zk42XAXdJxRFW3U6aUj3p.webp"
+            alt="CareerMentor AI Logo"
+            className="w-9 h-9 rounded-xl flex-shrink-0 object-cover"
+          />
           <div>
             <p className="font-display text-sm font-bold text-sidebar-foreground leading-tight">CareerMentor</p>
             <p className="text-xs text-sidebar-foreground/50">AI for Women in Tech</p>
@@ -112,9 +114,11 @@ export default function AppLayout({ children, title }: AppLayoutProps) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center space-y-4 animate-fade-in-up">
-          <div className="w-16 h-16 rounded-2xl gradient-primary flex items-center justify-center mx-auto">
-            <Sparkles className="w-8 h-8 text-white" />
-          </div>
+          <img
+            src="https://d2xsxph8kpxj0f.cloudfront.net/310519663217691016/k7VpytXHEM35u7EgMMjw5j/logo-icon-3Zk42XAXdJxRFW3U6aUj3p.webp"
+            alt="CareerMentor AI Logo"
+            className="w-16 h-16 rounded-2xl object-cover mx-auto"
+          />
           <h2 className="text-2xl font-display font-bold text-foreground">Sign in to continue</h2>
           <p className="text-muted-foreground">Access your personalized career mentor</p>
           <Button asChild className="gradient-primary text-white border-0">
@@ -156,9 +160,11 @@ export default function AppLayout({ children, title }: AppLayoutProps) {
             <Menu className="w-5 h-5" />
           </button>
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg gradient-primary flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-white" />
-            </div>
+            <img
+              src="https://d2xsxph8kpxj0f.cloudfront.net/310519663217691016/k7VpytXHEM35u7EgMMjw5j/logo-icon-3Zk42XAXdJxRFW3U6aUj3p.webp"
+              alt="CareerMentor AI Logo"
+              className="w-7 h-7 rounded-lg object-cover"
+            />
             <span className="font-display font-bold text-sm">CareerMentor AI</span>
           </div>
         </header>

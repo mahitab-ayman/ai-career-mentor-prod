@@ -7,6 +7,8 @@ import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { invokeLLM } from "./_core/llm";
 import { storagePut } from "./storage";
 import { parse as parseCookie } from "cookie";
+import { PDFParse } from "pdf-parse";
+import mammoth from "mammoth";
 import { createHeartbeatJob, deleteHeartbeatJob } from "./_core/heartbeat";
 import * as db from "./db";
 
@@ -188,7 +190,23 @@ Return a JSON array of exactly 4 career paths. Each path must have:
       const { id: documentId } = await db.saveCvDocument({ userId: ctx.user.id, filename: input.filename, fileKey: key, fileUrl: url, mimeType: input.mimeType });
       // Analyze with LLM
       const profile = await db.getUserProfile(ctx.user.id);
-      const cvText = buffer.toString("utf-8").replace(/[^\x20-\x7E\n]/g, " ").substring(0, 8000);
+      let cvText = "";
+      try {
+        if (input.mimeType === "application/pdf") {
+          const parser = new PDFParse({ data: buffer });
+          const result = await parser.getText();
+          cvText = result.text.substring(0, 8000);
+        } else if (input.mimeType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" || input.mimeType === "application/msword") {
+          const result = await mammoth.extractRawText({ buffer });
+          cvText = result.value.substring(0, 8000);
+        } else {
+          // Plain text
+          cvText = buffer.toString("utf-8").substring(0, 8000);
+        }
+      } catch (extractErr) {
+        console.warn("[CV] Text extraction failed, falling back to raw text:", extractErr);
+        cvText = buffer.toString("utf-8").replace(/[^\x20-\x7E\n]/g, " ").substring(0, 8000);
+      }
       const prompt = `Analyze this CV/resume for a woman in tech. Provide detailed, actionable feedback.
 
 CV Content:

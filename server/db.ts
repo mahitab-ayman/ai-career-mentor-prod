@@ -1,4 +1,4 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   CareerPath, CvAnalysis, CvDocument, InsertUser, InterviewQA, InterviewSession,
@@ -104,7 +104,7 @@ export async function createChatSession(userId: number, title?: string) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   const result = await db.insert(chatSessions).values({ userId, title: title ?? "New Conversation" });
-  return { sessionId: (result as any).insertId as number };
+  return { sessionId: (result as any)[0]?.insertId ?? (result as any).insertId as number };
 }
 
 export async function getChatSessions(userId: number) {
@@ -143,7 +143,7 @@ export async function saveCareerPath(data: Omit<CareerPath, "id" | "createdAt">)
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   const result = await db.insert(careerPathRecommendations).values(data);
-  return { id: (result as any).insertId as number };
+  return { id: (result as any)[0]?.insertId ?? (result as any).insertId as number };
 }
 
 export async function getCareerPaths(userId: number) {
@@ -163,14 +163,14 @@ export async function saveCvDocument(data: Omit<CvDocument, "id" | "createdAt">)
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   const result = await db.insert(cvDocuments).values(data);
-  return { id: (result as any).insertId as number };
+  return { id: (result as any)[0]?.insertId ?? (result as any).insertId as number };
 }
 
 export async function saveCvAnalysis(data: Omit<CvAnalysis, "id" | "createdAt">) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   const result = await db.insert(cvAnalyses).values(data);
-  return { id: (result as any).insertId as number };
+  return { id: (result as any)[0]?.insertId ?? (result as any).insertId as number };
 }
 
 export async function getCvAnalyses(userId: number) {
@@ -184,7 +184,7 @@ export async function createInterviewSession(data: Omit<InterviewSession, "id" |
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   const result = await db.insert(interviewSessions).values(data);
-  return { sessionId: (result as any).insertId as number };
+  return { sessionId: (result as any)[0]?.insertId ?? (result as any).insertId as number };
 }
 
 export async function getInterviewSessions(userId: number) {
@@ -216,13 +216,21 @@ export async function createRoadmap(data: { userId: number; title: string; targe
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   const result = await db.insert(learningRoadmaps).values(data);
-  return { roadmapId: (result as any).insertId as number };
+  return { roadmapId: (result as any)[0]?.insertId ?? (result as any).insertId as number };
 }
 
-export async function saveRoadmapStages(stages: Omit<RoadmapStage, "id" | "completedAt">[]) {
+export async function saveRoadmapStages(stages: { roadmapId: number; stageNumber: number; title: string; description?: string | null; skills?: string[] | null; resources?: { title: string; url: string; type: string }[] | null; estimatedWeeks?: number | null; isCompleted?: boolean | null }[]) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  if (stages.length > 0) await db.insert(roadmapStages).values(stages);
+  if (stages.length === 0) return;
+  // Use raw SQL to bypass Drizzle's default value handling for notNull int columns
+  for (const stage of stages) {
+    const skillsJson = JSON.stringify(stage.skills ?? []);
+    const resourcesJson = JSON.stringify(stage.resources ?? []);
+    await db.execute(
+      sql`INSERT INTO roadmap_stages (roadmapId, stageNumber, title, description, skills, resources, estimatedWeeks, isCompleted) VALUES (${stage.roadmapId}, ${stage.stageNumber}, ${stage.title}, ${stage.description ?? null}, ${skillsJson}, ${resourcesJson}, ${stage.estimatedWeeks ?? null}, ${stage.isCompleted ? 1 : 0})`
+    );
+  }
 }
 
 export async function getRoadmaps(userId: number) {
@@ -254,7 +262,7 @@ export async function saveLinkedinAnalysis(data: Omit<LinkedinAnalysis, "id" | "
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   const result = await db.insert(linkedinAnalyses).values(data);
-  return { id: (result as any).insertId as number };
+  return { id: (result as any)[0]?.insertId ?? (result as any).insertId as number };
 }
 
 export async function getLinkedinAnalyses(userId: number) {

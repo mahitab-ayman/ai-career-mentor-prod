@@ -13,9 +13,16 @@ import { formatDistanceToNow } from "date-fns";
 export default function Chat() {
   const utils = trpc.useUtils();
   const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
+  // Keep a ref in sync so async callbacks always see the latest value
+  const activeSessionIdRef = useRef<number | null>(null);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const setSession = (id: number | null) => {
+    activeSessionIdRef.current = id;
+    setActiveSessionId(id);
+  };
 
   const { data: sessions, isLoading: sessionsLoading } = trpc.chat.getSessions.useQuery();
   const { data: messages, isLoading: messagesLoading } = trpc.chat.getMessages.useQuery(
@@ -26,22 +33,18 @@ export default function Chat() {
   const createSession = trpc.chat.createSession.useMutation({
     onSuccess: (data) => {
       utils.chat.getSessions.invalidate();
-      setActiveSessionId(data.sessionId);
+      setSession(data.sessionId);
     },
   });
 
   const deleteSession = trpc.chat.deleteSession.useMutation({
     onSuccess: () => {
       utils.chat.getSessions.invalidate();
-      setActiveSessionId(null);
+      setSession(null);
     },
   });
 
   const sendMessage = trpc.chat.sendMessage.useMutation({
-    onSuccess: () => {
-      utils.chat.getMessages.invalidate({ sessionId: activeSessionId! });
-      utils.chat.getSessions.invalidate();
-    },
     onError: (err) => toast.error(err.message),
   });
 
@@ -51,17 +54,22 @@ export default function Chat() {
 
   const handleSend = async () => {
     if (!input.trim() || sending) return;
-    let sessionId = activeSessionId;
+    let sessionId = activeSessionIdRef.current;
     if (!sessionId) {
       const result = await createSession.mutateAsync();
       sessionId = result.sessionId;
-      setActiveSessionId(sessionId);
+      setSession(sessionId);
     }
     const msg = input.trim();
     setInput("");
     setSending(true);
     try {
-      await sendMessage.mutateAsync({ sessionId, message: msg });
+      await sendMessage.mutateAsync({ sessionId: sessionId!, message: msg });
+      // Invalidate using the local sessionId variable (not the stale state)
+      utils.chat.getMessages.invalidate({ sessionId: sessionId! });
+      utils.chat.getSessions.invalidate();
+    } catch {
+      // error already handled by onError
     } finally {
       setSending(false);
     }
@@ -83,7 +91,7 @@ export default function Chat() {
             <Button
               className="w-full gradient-primary text-white border-0"
               size="sm"
-              onClick={() => { setActiveSessionId(null); createSession.mutate(); }}
+              onClick={() => { setSession(null); createSession.mutate(); }}
               disabled={createSession.isPending}
             >
               <Plus className="w-4 h-4 mr-2" />
@@ -105,7 +113,7 @@ export default function Chat() {
                       ? "bg-primary/10 text-primary"
                       : "hover:bg-muted text-foreground"
                   )}
-                  onClick={() => setActiveSessionId(session.id)}
+                  onClick={() => setSession(session.id)}
                 >
                   <MessageSquare className="w-3.5 h-3.5 flex-shrink-0" />
                   <div className="flex-1 min-w-0">

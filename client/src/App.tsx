@@ -5,33 +5,41 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
+import Dashboard from "./pages/Dashboard";
+import Chat from "./pages/Chat";
+import CareerPaths from "./pages/CareerPaths";
+import CVAnalysis from "./pages/CVAnalysis";
+import Interview from "./pages/Interview";
+import Roadmap from "./pages/Roadmap";
+import LinkedIn from "./pages/LinkedIn";
+import Notifications from "./pages/Notifications";
+import Profile from "./pages/Profile";
 
 function Router() {
-  // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
+      <Route path="/" component={Home} />
+      <Route path="/dashboard" component={Dashboard} />
+      <Route path="/chat" component={Chat} />
+      <Route path="/career-paths" component={CareerPaths} />
+      <Route path="/cv-analysis" component={CVAnalysis} />
+      <Route path="/interview" component={Interview} />
+      <Route path="/roadmap" component={Roadmap} />
+      <Route path="/linkedin" component={LinkedIn} />
+      <Route path="/notifications" component={Notifications} />
+      <Route path="/profile" component={Profile} />
+      <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>
   );
 }
 
-// NOTE: About Theme
-// - First choose a default theme according to your design style (dark or light bg), than change color palette in index.css
-//   to keep consistent foreground/background color across components
-// - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
-
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="light"
-        // switchable
-      >
+      <ThemeProvider defaultTheme="light">
         <TooltipProvider>
-          <Toaster />
+          <Toaster richColors position="top-right" />
           <Router />
         </TooltipProvider>
       </ThemeProvider>
